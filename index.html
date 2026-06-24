@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>할 일 관리 앱</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #d8f6d0;
+      color: #111;
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+      margin: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      text-align: center;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 20px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+
+    .guide-button {
+      background: transparent;
+      color: #111;
+      border: 1px solid #111;
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .guide-button:hover {
+      background: #111;
+      color: #fff;
+    }
+
+    .guide-text {
+      display: none;
+      margin: 0 0 20px;
+      font-size: 14px;
+      color: #333;
+      background: #f8fafc;
+      border: 1px solid #dce3ea;
+      border-radius: 14px;
+      padding: 14px 16px;
+      line-height: 1.7;
+    }
+
+    .guide-text.show {
+      display: block;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 16px;
+      border: 1px solid #d3d9e3;
+      border-radius: 14px;
+      font-size: 15px;
+      outline: none;
+      color: #111;
+      background: #f9fafb;
+    }
+
+    input[type="text"]:focus {
+      border-color: #111;
+      box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08);
+    }
+
+    button {
+      min-width: 88px;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      cursor: pointer;
+      background: #111;
+      color: #fff;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .todo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .todo-item:last-child {
+      border-bottom: none;
+    }
+
+    .todo-text {
+      flex: 1;
+      margin-right: 14px;
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .todo-text.completed {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    .todo-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .todo-actions button {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-radius: 12px;
+    }
+
+    .complete-btn {
+      background: #2f855a;
+    }
+
+    .complete-btn:hover {
+      background: #276749;
+    }
+
+    .delete-btn {
+      background: #c53030;
+    }
+
+    .delete-btn:hover {
+      background: #9b2c2c;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #666;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="subtitle-row">
+      <div>
+        <h1>할 일 관리</h1>
+        <p class="subtitle">여기에 오늘 해야 할 일을 입력하고 추가하세요. 완료 표시와 삭제가 가능합니다.</p>
+      </div>
+      <button class="guide-button" id="guide-button">사용 안내</button>
+    </div>
+
+    <p id="guide-text" class="guide-text">할 일을 입력한 뒤 추가 버튼을 누르세요. 완료 버튼을 누르면 할 일이 취소선으로 표시되고, 삭제 버튼으로 목록에서 제거할 수 있습니다.</p>
+
+    <div class="input-row">
+      <input id="todo-input" type="text" placeholder="할 일을 입력하세요" />
+      <button id="add-button">추가</button>
+    </div>
+
+    <ul id="todo-list" class="todo-list"></ul>
+    <p id="empty-message" class="empty-message">아직 추가된 할 일이 없습니다.</p>
+  </div>
+
+  <script>
+    const todoInput = document.getElementById('todo-input');
+    const addButton = document.getElementById('add-button');
+    const todoList = document.getElementById('todo-list');
+    const emptyMessage = document.getElementById('empty-message');
+    const guideButton = document.getElementById('guide-button');
+    const guideText = document.getElementById('guide-text');
+
+    const todos = [];
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+
+      if (todos.length === 0) {
+        emptyMessage.style.display = 'block';
+        return;
+      }
+
+      emptyMessage.style.display = 'none';
+
+      todos.forEach((todo, index) => {
+        const item = document.createElement('li');
+        item.className = 'todo-item';
+
+        const text = document.createElement('span');
+        text.className = 'todo-text' + (todo.completed ? ' completed' : '');
+        text.textContent = todo.text;
+
+        const actions = document.createElement('div');
+        actions.className = 'todo-actions';
+
+        const completeButton = document.createElement('button');
+        completeButton.className = 'complete-btn';
+        completeButton.textContent = todo.completed ? '되돌리기' : '완료';
+        completeButton.addEventListener('click', () => {
+          todos[index].completed = !todos[index].completed;
+          renderTodos();
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-btn';
+        deleteButton.textContent = '삭제';
+        deleteButton.addEventListener('click', () => {
+          todos.splice(index, 1);
+          renderTodos();
+        });
+
+        actions.appendChild(completeButton);
+        actions.appendChild(deleteButton);
+        item.appendChild(text);
+        item.appendChild(actions);
+        todoList.appendChild(item);
+      });
+    }
+
+    function addTodo() {
+      const text = todoInput.value.trim();
+      if (text === '') {
+        alert('할 일을 입력해 주세요.');
+        return;
+      }
+
+      todos.push({ text, completed: false });
+      todoInput.value = '';
+      renderTodos();
+    }
+
+    guideButton.addEventListener('click', () => {
+      guideText.classList.toggle('show');
+    });
+
+    addButton.addEventListener('click', addTodo);
+    todoInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        addTodo();
+      }
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
