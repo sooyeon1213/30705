@@ -16,5 +16,5 @@ HTML, CSS, JavaScript를 하나의 index.html 파일에 넣어서 할 일 관리
 코드 하나하나를 내가 쓰고 실해해야만 하는 건 줄 알았는데 이렇게 쉽고 간단하게 할 수 있는 것을 배웠다.
 
 ## 6. 제출 링크
-GitHub Repository 주소: 
+GitHub Repository 주소: https://github.com/sooyeon1213/30705
 실행 화면 주소: https://obscure-system-qv7q99qgwx47h95w4-8000.app.github.dev/
